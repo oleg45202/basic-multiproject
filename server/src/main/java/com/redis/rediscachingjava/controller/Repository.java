@@ -27,48 +27,57 @@ import javax.servlet.http.HttpServletResponse;
 @RestController
 @Service
 @Component
-public class Repository implements ApplicationListener<ContextRefreshedEvent> {
-    @Value("${REDIS_URL}")
-    private String redisUrl;
-
-    @Value("${REDIS_HOST}")
-    private String redisHost;
-
-    @Value("${REDIS_PORT}")
-    private String redisPort;
-
-    @Value("${REDIS_PASSWORD}")
-    private String redisPassword;
-
-    @Value("${REDIS_DB}")
-    private String redisDB;
-
-    Jedis jedis;
-
-    @Override
-    public void onApplicationEvent(ContextRefreshedEvent event) {
-        try {
-            if (!redisUrl.equals("")) {
-                jedis = new Jedis(redisUrl);
-            } else {
-                jedis = new Jedis(redisHost, Integer.parseInt(redisPort));
-            }
-            if (!redisPassword.equals("")){
-                jedis.auth(redisPassword);
-            }
-            if (!redisDB.equals("")) {
-                jedis.select(Integer.parseInt(redisDB));
-            }
-        }
-        catch (Exception ignored) {
-        }
-    }
+public class Repository {
+    //    @Value("${REDIS_URL}")
+//    private String redisUrl;
+//
+//    @Value("${REDIS_HOST}")
+//    private String redisHost;
+//
+//    @Value("${REDIS_PORT}")
+//    private String redisPort;
+//
+//    @Value("${REDIS_PASSWORD}")
+//    private String redisPassword;
+//
+//    @Value("${REDIS_DB}")
+//    private String redisDB;
+//
+//    Jedis jedis;
+//
+//    @Override
+//    public void onApplicationEvent(ContextRefreshedEvent event) {
+//        try {
+//            if (!redisUrl.equals("")) {
+//                System.out.println(redisUrl);
+//                jedis = new Jedis(redisUrl);
+//            } else {
+//                System.out.println(redisPort);
+//
+//                jedis = new Jedis(redisHost, Integer.parseInt(redisPort));
+//            }
+//            if (!redisPassword.equals("")){
+//                jedis.auth(redisPassword);
+//                System.out.println(redisPassword);
+//
+//            }
+//            if (!redisDB.equals("")) {
+//                jedis.select(Integer.parseInt(redisDB));
+//                System.out.println(redisDB);
+//
+//            }
+//        }
+//        catch (Exception ignored) {
+//        }
+//    }
     @RequestMapping(value = "/repos/{gitName}", produces = { "text/html; charset=utf-8" })
     @ResponseBody
     public String getGitData(HttpServletResponse response,
                              @PathVariable("gitName") String gitName) {
         long startTime = System.nanoTime();
-        String gitData = jedis.get(gitName);
+//        String gitData = jedis.get(gitName);
+        String gitData = gitName;
+
         boolean isCached = true;
         if (gitData == null) {
             gitData = getGitReposData(gitName);
@@ -97,7 +106,7 @@ public class Repository implements ApplicationListener<ContextRefreshedEvent> {
             JsonObject jsonObject = jsonElement.getAsJsonObject();
             try {
                 String gitData = jsonObject.get("public_repos").getAsString();
-                jedis.setex(gitName, 3600, gitData);
+//                jedis.setex(gitName, 3600, gitData);
                 return gitData;
             } catch (Exception e){
                 throw new ResponseStatusException(HttpStatus.NOT_FOUND);
